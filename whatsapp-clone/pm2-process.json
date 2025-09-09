@@ -1,0 +1,11 @@
+{
+    "apps": [
+      {
+        "name": "meyaoo",
+        "script": "./index.js",
+        "watch": true,
+        "ignore_watch": ["uploads", "node_modules"]
+      }
+    ]
+  }
+  
