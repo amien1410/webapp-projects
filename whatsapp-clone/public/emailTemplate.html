@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=800, initial-scale=1.0" />
+    <title>{{app_name}}</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      padding-top: 5rem;
+      padding-bottom: 5rem;
+      padding: 0;
+      background-color: #f4f4f4;
+    "
+  >
+    <!-- Wrapper Table -->
+    <div style="height: 4rem"></div>
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr>
+        <td align="center">
+          <!-- Main Container -->
+          <table
+            border="0"
+            cellpadding="0"
+            cellspacing="0"
+            width="800"
+            style="
+              background-color: #ffffff;
+              font-family: 'Poppins', Arial, sans-serif;
+            "
+          >
+            <!-- Header Image Row -->
+            <tr>
+              <td align="center">
+                <img
+                  src="{{banner_image}}"
+                  alt="Banner"
+                  style="width: 100%; max-width: 800px; height: auto; display: block"
+                />
+              </td>
+            </tr>
+            <!-- Content Row -->
+            <tr>
+              <td align="center" style="padding: 20px">
+                <!-- OTP Heading -->
+                <h4
+                  style="
+                    margin: 0;
+                    font-size: 18px;
+                    font-weight: 600;
+                    color: #000000;
+                  "
+                >
+                  Your One-time Code is
+                </h4>
+                <!-- OTP Code Button (using a table for consistent spacing) -->
+                <table
+                  border="0"
+                  cellpadding="0"
+                  cellspacing="0"
+                  style="margin: 20px 0"
+                >
+                  <tr>
+                    <td
+                      align="center"
+                      style="
+                        border: 2px solid #000000;
+                        padding: 15px 80px;
+                        font-weight: 600;
+                        font-size: 16px;
+                        cursor: pointer;
+                      "
+                    >
+                      {{generatedOtp}}
+                    </td>
+                  </tr>
+                </table>
+                <!-- OTP Description -->
+                <table
+                  border="0"
+                  cellpadding="0"
+                  cellspacing="0"
+                  width="66%"
+                  style="margin-bottom: 20px"
+                >
+                  <tr>
+                    <td
+                      align="center"
+                      style="font-weight: 500; font-size: 14px; color: #000000"
+                    >
+                      Please verify you're really you by entering this 6-digit
+                      code when you sign-in. Just a heads up, this code will
+                      expire in 10 minutes for security reasons.
+                    </td>
+                  </tr>
+                </table>
+                <!-- App Store Heading -->
+                <h4
+                  style="
+                    margin: 0;
+                    font-size: 25px;
+                    font-weight: 600;
+                    color: #000000;
+                  "
+                >
+                  You Can Check {{app_name}} on
+                </h4>
+                <!-- Links Row -->
+                <table
+                  border="0"
+                  cellpadding="0"
+                  cellspacing="0"
+                  width="80%"
+                  style="margin: 20px auto"
+                >
+                  <tr>
+                    <!-- Website Link -->
+                    <td align="center" style="padding: 10px">
+                      <a
+                        href="{{website_link}}"
+                        target="_blank"
+                        style="text-decoration: none; color: #000000"
+                      >
+                        <img
+                          src="{{baseUrl}}image/websiteicon.png"
+                          alt="Website"
+                          style="
+                            display: block;
+                            width: 51px;
+                            height: 50px;
+                            border: 0;
+                            max-width: fit-content;
+                          "
+                        />
+                        <p style="margin: 5px 0; font-size: 14px">
+                          Click to Visit Website
+                        </p>
+                      </a>
+                    </td>
+                    <!-- APK Link -->
+                    <td align="center" style="padding: 10px">
+                      <a
+                        href="{{apk_link}}"
+                        download
+                        style="text-decoration: none; color: #000000"
+                      >
+                        <img
+                          src="{{baseUrl}}image/apk.png"
+                          alt="Download APK"
+                          style="
+                            display: block;
+                            width: 51px;
+                            height: 50px;
+                            border: 0;
+                          "
+                        />
+                        <p style="margin: 5px 0; font-size: 14px">
+                          Download APK
+                        </p>
+                      </a>
+                    </td>
+                    <!-- TestFlight (Apple) Link -->
+                    <td align="center" style="padding: 10px">
+                      <a
+                        href="{{ios_link}}"
+                        target="_blank"
+                        style="text-decoration: none; color: #000000"
+                      >
+                        <img
+                          src="{{baseUrl}}image/apple.png"
+                          alt="Download TestFlight"
+                          style="
+                            display: block;
+                            width: 51px;
+                            height: 50px;
+                            border: 0;
+                          "
+                        />
+                        <p style="margin: 5px 0; font-size: 14px">
+                          Download TestFlight
+                        </p>
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <!-- Footer Row -->
+            <tr>
+              <td
+                align="center"
+                style="background-color: #000000; padding: 10px"
+              >
+                <p style="margin: 0; font-size: 12px; color: #ffffff">
+                  {{copy_right}}
+                </p>
+              </td>
+            </tr>
+          </table>
+          <!-- End Main Container -->
+        </td>
+      </tr>
+    </table>
+    <div style="height: 4rem"></div>
+  </body>
+</html>
