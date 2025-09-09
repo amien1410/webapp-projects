@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WhoXa Chat</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', Arial, sans-serif;
+      background-color: #f4f4f4;
+    "
+  >
+    <!-- Email Template Design -->
+    <div
+      style="
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+      "
+    >
+      <div
+        style="
+background-image: url('{{banner_image}}'); 
+background-repeat: no-repeat;
+background-position: center;
+height: 288px;
+width: 800px;
+display: flex;
+align-items: center;
+background-size: cover;
+"
+      ></div>
+      <div
+        style="
+          width: 800px;
+          background-color: white;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          flex-direction: column;
+        "
+      >
+        <h4 style="font-weight: 600; font-size: 18px">Your One-time Code is</h4>
+        <!-- btn -->
+        <div
+          style="
+            font-weight: 600;
+            border: 2px solid black;
+            padding: 15px 80px;
+            cursor: pointer;
+          "
+        >
+          375835
+        </div>
+        <!-- otp description -->
+        <div
+          style="
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            max-width: 66%;
+          "
+        >
+          <p style="font-weight: 500">
+            Please verify you’re really you by entering this 6-digit code when
+            you sign-in. Just a heads up, this code will expire in 10 minutes
+            for security reasons
+          </p>
+        </div>
+        <h4 style="font-size: 25px; font-weight: 600">
+          You Can Check {{app_name}} on
+        </h4>
+        <div
+          style="
+            width: 80%;
+            margin: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <!-- website link -->
+          <a
+            href="{{website_link}}"
+            target="_blank"
+            style="text-decoration: none; color: inherit"
+          >
+            <div
+              style="display: flex; flex-direction: column; align-items: center"
+            >
+              <img
+                src="{{base_url}}image/websiteicon.png"
+                alt="Whoxa Logo"
+                style="width: 51px; cursor: pointer; height: 50px"
+              />
+              <p style="width: 70%; text-align: center; margin: 5px 0">
+                Click to Visit Website
+              </p>
+            </div>
+          </a>
+          <!-- apk -->
+          <a
+            href="{{apk_link}}"
+            target="_blank"
+            download
+            style="text-decoration: none; color: inherit"
+          >
+            <div
+              style="display: flex; flex-direction: column; align-items: center"
+            >
+              <img
+                src="{{base_url}}image/apk.png"
+                alt="Whoxa Logo"
+                style="width: 51px; cursor: pointer; height: 50px"
+              />
+              <p style="width: 70%; text-align: center; margin: 5px 0">
+                Download APK
+              </p>
+            </div>
+          </a>
+          <!-- apple -->
+          <a
+            href="{{apple_link}}"
+            target="_blank"
+            style="text-decoration: none; color: inherit"
+          >
+            <div
+              style="display: flex; flex-direction: column; align-items: center"
+            >
+              <img
+                src="{{base_url}}image/apple.png"
+                alt="Whoxa Logo"
+                style="width: 51px; cursor: pointer; height: 50px"
+              />
+              <p style="width: 70%; text-align: center; margin: 5px 0">
+                Download TestFlight
+              </p>
+            </div>
+          </a>
+        </div>
+      </div>
+      <div
+        style="
+          width: 800px;
+          background-color: black;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          flex-direction: column;
+        "
+      >
+        <p style="color: white; text-align: center; align-items: center">
+          {{copy_right}}
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
