@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake Chat Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Base styles for all themes */
+        .chat-screen {
+            transition: background-color 0.3s ease;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+
+        /* --- WhatsApp Theme --- */
+        .theme-whatsapp .chat-header {
+            background-color: #075E54;
+            color: white;
+        }
+        .theme-whatsapp .chat-bg {
+            background-color: #E5DDD5;
+            background-image: url('https://i.imgur.com/ry7oF3g.png'); /* Subtle pattern */
+        }
+        .theme-whatsapp .sent-bubble {
+            background-color: #DCF8C6;
+        }
+        .theme-whatsapp .received-bubble {
+            background-color: #FFFFFF;
+        }
+        .theme-whatsapp .message-time {
+            color: #999;
+        }
+
+        /* --- Instagram Theme --- */
+        .theme-instagram .chat-header {
+            background-color: #ffffff;
+            color: #262626;
+            border-bottom: 1px solid #dbdbdb;
+        }
+        .theme-instagram .chat-bg {
+            background-color: #FFFFFF;
+        }
+        .theme-instagram .sent-bubble {
+            background: linear-gradient(to right, #8a2387, #e94057, #f27121);
+            color: white;
+        }
+        .theme-instagram .sent-bubble .message-time {
+            color: #eee;
+        }
+        .theme-instagram .received-bubble {
+            background-color: #EFEFEF;
+        }
+        .theme-instagram .message-time {
+            color: #8e8e8e;
+        }
+
+        /* --- Telegram Theme --- */
+        .theme-telegram .chat-header {
+            background-color: #527DA3;
+            color: white;
+        }
+        .theme-telegram .chat-bg {
+            background-color: #e5eef7;
+        }
+        .theme-telegram .sent-bubble {
+            background-color: #e1ffc7;
+        }
+        .theme-telegram .received-bubble {
+            background-color: #ffffff;
+        }
+        .theme-telegram .message-time {
+            color: #a3b2c0;
+        }
+
+        /* --- Discord Theme --- */
+        .theme-discord .chat-header {
+            background-color: #36393F;
+            color: #FFFFFF;
+            border-bottom: 1px solid #202225;
+        }
+        .theme-discord .chat-bg {
+            background-color: #36393F;
+        }
+        .theme-discord .message-container {
+            flex-direction: row !important; /* Override sent/received alignment */
+            align-items: flex-start !important;
+            margin-bottom: 1rem;
+        }
+        .theme-discord .sent-bubble, .theme-discord .received-bubble {
+            background-color: transparent;
+            text-align: left;
+            padding: 0;
+            border-radius: 0;
+        }
+        .theme-discord .discord-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 12px;
+            background-color: #7289DA;
+        }
+         .theme-discord .discord-username {
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 2px;
+        }
+        .theme-discord .message-content {
+             color: #dcddde;
+        }
+        .theme-discord .message-time {
+            display: none; /* Time is usually shown on hover in Discord */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+
+    <div class="flex flex-col lg:flex-row h-screen overflow-hidden">
+
+        <!-- Left Side: Chat Screen -->
+        <div class="w-full lg:w-1/2 h-1/2 lg:h-full flex flex-col p-4">
+            <div id="chat-screen" class="chat-screen theme-whatsapp flex-1 flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
+                <!-- Chat Header -->
+                <header id="chat-header" class="chat-header flex items-center p-3 shadow-md z-10">
+                    <img src="https://placehold.co/40x40/7e86d7/ffffff?text=U" id="profile-pic" class="w-10 h-10 rounded-full mr-3">
+                    <div>
+                        <h2 class="font-semibold text-lg" id="chat-name">User Name</h2>
+                        <p class="text-sm opacity-80" id="chat-status">online</p>
+                    </div>
+                </header>
+
+                <!-- Chat Messages -->
+                <div id="chat-bg" class="chat-bg flex-1 overflow-y-auto p-4">
+                    <div id="messages-container" class="flex flex-col space-y-2">
+                        <!-- Example Messages -->
+                         <div class="flex justify-start">
+                            <div class="message-bubble received-bubble p-3 rounded-lg">
+                                <p class="message-content">Hey, did you see the new designs?</p>
+                                <span class="message-time text-xs float-right mt-1 ml-2">10:00 AM</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-end">
+                            <div class="message-bubble sent-bubble p-3 rounded-lg">
+                                <p class="message-content">Yeah, they look amazing! Great job.</p>
+                                <span class="message-time text-xs float-right mt-1 ml-2">10:01 AM</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: Controls -->
+        <div class="w-full lg:w-1/2 h-1/2 lg:h-full flex items-center justify-center p-4">
+            <div class="w-full max-w-lg bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg space-y-6">
+                <h1 class="text-2xl font-bold text-center">Chat Creator</h1>
+
+                <!-- Theme Selector -->
+                <div>
+                    <label class="font-semibold mb-2 block">Chat Theme</label>
+                    <select id="theme-selector" class="w-full p-3 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg">
+                        <option value="theme-whatsapp" selected>WhatsApp</option>
+                        <option value="theme-instagram">Instagram</option>
+                        <option value="theme-telegram">Telegram</option>
+                        <option value="theme-discord">Discord</option>
+                    </select>
+                </div>
+
+                <!-- Message Form -->
+                <form id="message-form" class="space-y-4">
+                    <div>
+                        <label for="sender-name" class="font-semibold mb-2 block">Chat With</label>
+                        <input type="text" id="sender-name" value="User Name" class="w-full p-3 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg" placeholder="Enter the other person's name">
+                    </div>
+                    
+                    <div>
+                        <label for="message-input" class="font-semibold mb-2 block">Message</label>
+                        <textarea id="message-input" rows="3" class="w-full p-3 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg" placeholder="Type your message..."></textarea>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <div class="flex-1">
+                            <label for="message-time" class="font-semibold mb-2 block">Time</label>
+                            <input type="time" id="message-time" class="w-full p-3 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg">
+                        </div>
+                        <div class="flex-1">
+                             <label class="font-semibold mb-2 block">From</label>
+                             <div class="flex items-center justify-around p-3 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg">
+                                <label class="flex items-center"><input type="radio" name="sender" value="sent" class="mr-2 accent-blue-500"> Me</label>
+                                <label class="flex items-center"><input type="radio" name="sender" value="received" class="mr-2 accent-pink-500" checked> Them</label>
+                             </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300">
+                        Add Message
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeSelector = document.getElementById('theme-selector');
+            const chatScreen = document.getElementById('chat-screen');
+            const messageForm = document.getElementById('message-form');
+            const messageInput = document.getElementById('message-input');
+            const messageTimeInput = document.getElementById('message-time');
+            const messagesContainer = document.getElementById('messages-container');
+            const chatBg = document.getElementById('chat-bg');
+            const chatName = document.getElementById('chat-name');
+            const senderNameInput = document.getElementById('sender-name');
+
+            // --- Theme Switcher ---
+            themeSelector.addEventListener('change', (e) => {
+                chatScreen.className = 'chat-screen flex-1 flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden'; // Reset classes
+                chatScreen.classList.add(e.target.value);
+            });
+
+            // --- Update Chat Name ---
+            senderNameInput.addEventListener('input', (e) => {
+                chatName.textContent = e.target.value || 'User Name';
+            });
+
+            // --- Add Message ---
+            messageForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const messageText = messageInput.value.trim();
+                if (!messageText) return;
+
+                const messageType = document.querySelector('input[name="sender"]:checked').value;
+                
+                let messageTime = messageTimeInput.value;
+                if (!messageTime) {
+                    const now = new Date();
+                    const hours = String(now.getHours()).padStart(2, '0');
+                    const minutes = String(now.getMinutes()).padStart(2, '0');
+                    messageTime = `${hours}:${minutes}`;
+                } else {
+                    // Reformat time to AM/PM
+                    let [hours, minutes] = messageTime.split(':');
+                    const ampm = hours >= 12 ? 'PM' : 'AM';
+                    hours = hours % 12;
+                    hours = hours ? hours : 12; // the hour '0' should be '12'
+                    messageTime = `${hours}:${minutes} ${ampm}`;
+                }
+
+
+                const messageElement = createMessageElement(messageText, messageType, messageTime);
+                messagesContainer.appendChild(messageElement);
+
+                // Clear input and scroll down
+                messageInput.value = '';
+                chatBg.scrollTop = chatBg.scrollHeight;
+            });
+            
+            function createMessageElement(text, type, time) {
+                // Main container for the message bubble
+                const messageContainer = document.createElement('div');
+                
+                // For Discord theme, we need a special structure
+                if (chatScreen.classList.contains('theme-discord')) {
+                    messageContainer.className = 'message-container flex';
+                    
+                    const avatar = document.createElement('div');
+                    avatar.className = 'discord-avatar';
+
+                    const messageBody = document.createElement('div');
+                    
+                    const username = document.createElement('div');
+                    username.className = 'discord-username';
+                    username.textContent = type === 'sent' ? 'Me' : senderNameInput.value;
+
+                    const content = document.createElement('div');
+                    content.className = 'message-content';
+                    content.textContent = text;
+                    
+                    messageBody.appendChild(username);
+                    messageBody.appendChild(content);
+                    messageContainer.appendChild(avatar);
+                    messageContainer.appendChild(messageBody);
+
+                } else {
+                    // For all other themes
+                    const bubble = document.createElement('div');
+                    bubble.className = `message-bubble ${type}-bubble p-3 rounded-lg`;
+
+                    const content = document.createElement('p');
+                    content.className = 'message-content';
+                    content.textContent = text;
+                    
+                    const timeSpan = document.createElement('span');
+                    timeSpan.className = 'message-time text-xs float-right mt-1 ml-2';
+                    timeSpan.textContent = time;
+
+                    bubble.appendChild(content);
+                    bubble.appendChild(timeSpan);
+                    
+                    messageContainer.appendChild(bubble);
+                    messageContainer.className = type === 'sent' ? 'flex justify-end' : 'flex justify-start';
+                }
+
+                return messageContainer;
+            }
+
+        });
+    </script>
+</body>
+</html>
