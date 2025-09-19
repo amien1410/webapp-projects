@@ -21,6 +21,26 @@
             word-wrap: break-word;
         }
 
+        .read-receipt {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            margin-left: 4px;
+            vertical-align: bottom;
+            stroke: #999;
+            transition: stroke 0.3s ease;
+        }
+        .read-receipt.read {
+            stroke: #34B7F1;
+        }
+        .theme-instagram .read-receipt {
+            stroke: #eee;
+        }
+        .theme-instagram .read-receipt.read {
+            stroke: #a5d8ff;
+        }
+
+
         /* --- WhatsApp Theme --- */
         .theme-whatsapp .chat-header {
             background-color: #075E54;
@@ -28,7 +48,7 @@
         }
         .theme-whatsapp .chat-bg {
             background-color: #E5DDD5;
-            background-image: url('https://i.imgur.com/ry7oF3g.png'); /* Subtle pattern */
+            background-image: url('https://img.freepik.com/free-vector/messages-light-colour-background_78370-2586.jpg'); /* Subtle pattern */
         }
         .theme-whatsapp .sent-bubble {
             background-color: #DCF8C6;
@@ -107,6 +127,8 @@
             border-radius: 50%;
             margin-right: 12px;
             background-color: #7289DA;
+            background-size: cover;
+            background-position: center;
         }
          .theme-discord .discord-username {
             font-weight: 600;
@@ -130,7 +152,7 @@
             <div id="chat-screen" class="chat-screen theme-whatsapp flex-1 flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
                 <!-- Chat Header -->
                 <header id="chat-header" class="chat-header flex items-center p-3 shadow-md z-10">
-                    <img src="https://placehold.co/40x40/7e86d7/ffffff?text=U" id="profile-pic" class="w-10 h-10 rounded-full mr-3">
+                    <img src="https://placehold.co/40x40/7e86d7/ffffff?text=U" id="profile-pic" class="w-10 h-10 rounded-full mr-3 object-cover" onerror="this.src='https://placehold.co/40x40/7e86d7/ffffff?text=E'">
                     <div>
                         <h2 class="font-semibold text-lg" id="chat-name">User Name</h2>
                         <p class="text-sm opacity-80" id="chat-status">online</p>
@@ -180,6 +202,10 @@
                         <label for="sender-name" class="font-semibold mb-2 block">Chat With</label>
                         <input type="text" id="sender-name" value="User Name" class="w-full p-3 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg" placeholder="Enter the other person's name">
                     </div>
+                     <div>
+                        <label for="profile-pic-url" class="font-semibold mb-2 block">Profile Picture URL</label>
+                        <input type="url" id="profile-pic-url" class="w-full p-3 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg" placeholder="https://example.com/image.png">
+                    </div>
                     
                     <div>
                         <label for="message-input" class="font-semibold mb-2 block">Message</label>
@@ -218,7 +244,11 @@
             const messagesContainer = document.getElementById('messages-container');
             const chatBg = document.getElementById('chat-bg');
             const chatName = document.getElementById('chat-name');
+            const chatStatus = document.getElementById('chat-status');
             const senderNameInput = document.getElementById('sender-name');
+            const profilePicUrlInput = document.getElementById('profile-pic-url');
+            const profilePic = document.getElementById('profile-pic');
+            let typingTimeout;
 
             // --- Theme Switcher ---
             themeSelector.addEventListener('change', (e) => {
@@ -230,6 +260,26 @@
             senderNameInput.addEventListener('input', (e) => {
                 chatName.textContent = e.target.value || 'User Name';
             });
+
+            // --- Update Profile Picture ---
+            profilePicUrlInput.addEventListener('input', (e) => {
+                const url = e.target.value.trim();
+                if (url) {
+                    profilePic.src = url;
+                } else {
+                    profilePic.src = `https://placehold.co/40x40/7e86d7/ffffff?text=${senderNameInput.value.charAt(0) || 'U'}`;
+                }
+            });
+            
+            // --- Typing Indicator ---
+            messageInput.addEventListener('input', () => {
+                clearTimeout(typingTimeout);
+                chatStatus.textContent = 'typing...';
+                typingTimeout = setTimeout(() => {
+                    chatStatus.textContent = 'online';
+                }, 1500);
+            });
+
 
             // --- Add Message ---
             messageForm.addEventListener('submit', (e) => {
@@ -243,24 +293,37 @@
                 let messageTime = messageTimeInput.value;
                 if (!messageTime) {
                     const now = new Date();
-                    const hours = String(now.getHours()).padStart(2, '0');
+                    const hours = now.getHours();
                     const minutes = String(now.getMinutes()).padStart(2, '0');
-                    messageTime = `${hours}:${minutes}`;
+                    const ampm = hours >= 12 ? 'PM' : 'AM';
+                    const formattedHours = hours % 12 || 12; // Convert 0 to 12
+                    messageTime = `${formattedHours}:${minutes} ${ampm}`;
                 } else {
                     // Reformat time to AM/PM
                     let [hours, minutes] = messageTime.split(':');
                     const ampm = hours >= 12 ? 'PM' : 'AM';
-                    hours = hours % 12;
-                    hours = hours ? hours : 12; // the hour '0' should be '12'
+                    hours = hours % 12 || 12; // the hour '0' should be '12'
                     messageTime = `${hours}:${minutes} ${ampm}`;
                 }
 
 
                 const messageElement = createMessageElement(messageText, messageType, messageTime);
                 messagesContainer.appendChild(messageElement);
+                
+                // Add read receipt if message was sent by "Me"
+                if (messageType === 'sent') {
+                    const receipt = messageElement.querySelector('.read-receipt');
+                    if(receipt) {
+                       setTimeout(() => {
+                            receipt.classList.add('read');
+                        }, 5000);
+                    }
+                }
 
                 // Clear input and scroll down
                 messageInput.value = '';
+                clearTimeout(typingTimeout);
+                chatStatus.textContent = 'online';
                 chatBg.scrollTop = chatBg.scrollHeight;
             });
             
@@ -274,6 +337,11 @@
                     
                     const avatar = document.createElement('div');
                     avatar.className = 'discord-avatar';
+                    const avatarUrl = type === 'sent' ? `https://placehold.co/40x40/ffffff/000000?text=Me` : profilePicUrlInput.value.trim();
+                    if(avatarUrl) {
+                        avatar.style.backgroundImage = `url('${avatarUrl}')`;
+                    }
+
 
                     const messageBody = document.createElement('div');
                     
@@ -298,14 +366,33 @@
                     const content = document.createElement('p');
                     content.className = 'message-content';
                     content.textContent = text;
-                    
+
+                    const timeWrapper = document.createElement('span');
+                    timeWrapper.className = 'float-right mt-1 ml-2';
+
                     const timeSpan = document.createElement('span');
-                    timeSpan.className = 'message-time text-xs float-right mt-1 ml-2';
+                    timeSpan.className = 'message-time text-xs';
                     timeSpan.textContent = time;
+                    
+                    timeWrapper.appendChild(timeSpan);
+
+                    if (type === 'sent') {
+                        const readReceiptSVG = `
+                        <svg viewBox="0 0 20 16" class="read-receipt">
+                            <path fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M1.5 8.5 L5.5 12.5 L11 7"></path>
+                            <path fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M7 8.5 L11 12.5 L18.5 5"></path>
+                        </svg>`;
+                        timeWrapper.innerHTML += readReceiptSVG;
+                    }
 
                     bubble.appendChild(content);
-                    bubble.appendChild(timeSpan);
+                    bubble.appendChild(timeWrapper);
                     
+                    // Clearfix for the float
+                    const clearer = document.createElement('div');
+                    clearer.style.clear = 'both';
+                    bubble.appendChild(clearer);
+
                     messageContainer.appendChild(bubble);
                     messageContainer.className = type === 'sent' ? 'flex justify-end' : 'flex justify-start';
                 }
@@ -317,3 +404,4 @@
     </script>
 </body>
 </html>
+
