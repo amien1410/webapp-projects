@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arabic Word Puzzle Game</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100%;
+      padding: 20px;
+    }
+
+    .game-container {
+      background: white;
+      border-radius: 24px;
+      padding: 40px;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      text-align: center;
+      color: #667eea;
+      margin-bottom: 30px;
+      font-size: 2.5em;
+    }
+
+    .word-display {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 40px;
+      min-height: 100px;
+      align-items: center;
+    }
+
+    .word-container {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .word-box {
+      min-width: 200px;
+      min-height: 80px;
+      border: 3px dashed #cbd5e0;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 15px 25px;
+      background: #f7fafc;
+      transition: all 0.3s ease;
+    }
+
+    .word-box.has-letters {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: 3px solid #667eea;
+      transform: scale(1.05);
+    }
+
+    .combined-word {
+      font-size: 3em;
+      font-weight: bold;
+      color: #cbd5e0;
+      letter-spacing: 2px;
+      direction: rtl;
+      transition: all 0.3s ease;
+    }
+
+    .word-box.has-letters .combined-word {
+      color: white;
+    }
+
+    .slots-indicator {
+      display: flex;
+      gap: 8px;
+      flex-direction: row-reverse;
+    }
+
+    .slot-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #cbd5e0;
+      transition: all 0.3s ease;
+    }
+
+    .slot-dot.filled {
+      background: #48bb78;
+      transform: scale(1.3);
+    }
+
+    .letters-container {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .letter-tile {
+      width: 70px;
+      height: 70px;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2em;
+      font-weight: bold;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+      user-select: none;
+    }
+
+    .letter-tile:hover {
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 8px 25px rgba(245, 87, 108, 0.6);
+    }
+
+    .letter-tile:active {
+      transform: translateY(-2px) scale(1.02);
+    }
+
+    .letter-tile.used {
+      opacity: 0.3;
+      cursor: not-allowed;
+      transform: scale(0.9);
+    }
+
+    .letter-tile.used:hover {
+      transform: scale(0.9);
+    }
+
+    .controls {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 15px 30px;
+      font-size: 1.1em;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+
+    .check-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .check-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+
+    .clear-btn {
+      background: #e2e8f0;
+      color: #4a5568;
+    }
+
+    .clear-btn:hover {
+      background: #cbd5e0;
+      transform: translateY(-2px);
+    }
+
+    .next-btn {
+      background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+      color: #2d3748;
+      box-shadow: 0 4px 15px rgba(132, 250, 176, 0.4);
+      display: none;
+    }
+
+    .next-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(132, 250, 176, 0.6);
+    }
+
+    .message {
+      text-align: center;
+      font-size: 1.5em;
+      font-weight: bold;
+      margin-top: 20px;
+      min-height: 40px;
+      transition: all 0.3s ease;
+    }
+
+    .message.correct {
+      color: #48bb78;
+      animation: bounce 0.6s ease;
+    }
+
+    .message.wrong {
+      color: #f56565;
+      animation: shake 0.5s ease;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      25% { transform: translateY(-20px); }
+      50% { transform: translateY(0); }
+      75% { transform: translateY(-10px); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      50% { transform: translateX(10px); }
+      75% { transform: translateX(-5px); }
+    }
+
+    @keyframes celebrate {
+      0% { transform: scale(1) rotate(0deg); }
+      25% { transform: scale(1.2) rotate(5deg); }
+      50% { transform: scale(1.1) rotate(-5deg); }
+      75% { transform: scale(1.2) rotate(5deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+
+    .celebrate {
+      animation: celebrate 0.6s ease;
+    }
+
+    @media (max-width: 640px) {
+      .game-container {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 1.8em;
+      }
+
+      .letter-slot, .letter-tile {
+        width: 60px;
+        height: 60px;
+        font-size: 1.8em;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <main>
+   <div class="game-container">
+    <h1 id="game-title">لعبة ترتيب الكلمات</h1>
+    <div class="word-display">
+     <div class="word-container">
+      <div class="word-box" id="word-box">
+       <div class="combined-word" id="combined-word">
+        ؟
+       </div>
+      </div>
+      <div class="slots-indicator" id="slots-indicator"></div>
+     </div>
+    </div>
+    <div class="letters-container" id="letters-container"></div>
+    <div class="controls"><button class="clear-btn" id="clear-btn">مسح</button> <button class="check-btn" id="check-btn">تحقق</button> <button class="next-btn" id="next-btn">كلمة جديدة</button>
+    </div>
+    <div class="message" id="message"></div>
+   </div>
+  </main>
+  <script>
+    const defaultConfig = {
+      game_title: "لعبة ترتيب الكلمات",
+      correct_message: "ممتاز! ا��إجابة صحيحة! 🎉",
+      wrong_message: "حاول مرة أخرى! 🤔",
+      next_button_text: "كلمة جديدة",
+      background_color: "#667eea",
+      secondary_color: "#764ba2",
+      tile_color: "#f5576c",
+      text_color: "#2d3748",
+      success_color: "#48bb78"
+    };
+
+    const words = [
+      { letters: ['ط', 'ل', 'ا', 'ب'], correct: 'طالب' },
+      { letters: ['ك', 'ت', 'ا', 'ب'], correct: 'كتاب' },
+      { letters: ['م', 'د', 'ر', 'س', 'ة'], correct: 'مدرسة' },
+      { letters: ['ق', 'ل', 'م'], correct: 'قلم' },
+      { letters: ['ب', 'ي', 'ت'], correct: 'بيت' },
+      { letters: ['ش', 'م', 'س'], correct: 'شمس' },
+      { letters: ['و', 'ر', 'د', 'ة'], correct: 'وردة' }
+    ];
+
+    let currentWord = null;
+    let userAnswer = [];
+    let audioContext = null;
+
+    function initAudio() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playSound(frequency, duration, type = 'sine') {
+      initAudio();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.value = frequency;
+      oscillator.type = type;
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + duration);
+    }
+
+    function playCorrectSound() {
+      playSound(523.25, 0.2);
+      setTimeout(() => playSound(659.25, 0.2), 150);
+      setTimeout(() => playSound(783.99, 0.3), 300);
+    }
+
+    function playWrongSound() {
+      playSound(200, 0.15, 'sawtooth');
+      setTimeout(() => playSound(150, 0.3, 'sawtooth'), 150);
+    }
+
+    function playClickSound() {
+      playSound(400, 0.1, 'square');
+    }
+
+    function shuffleArray(array) {
+      const newArray = [...array];
+      for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+      }
+      return newArray;
+    }
+
+    function loadNewWord() {
+      currentWord = words[Math.floor(Math.random() * words.length)];
+      userAnswer = [];
+      
+      const combinedWord = document.getElementById('combined-word');
+      const wordBox = document.getElementById('word-box');
+      const slotsIndicator = document.getElementById('slots-indicator');
+      const lettersContainer = document.getElementById('letters-container');
+      const message = document.getElementById('message');
+      const nextBtn = document.getElementById('next-btn');
+      
+      combinedWord.textContent = '؟';
+      wordBox.classList.remove('has-letters');
+      slotsIndicator.innerHTML = '';
+      lettersContainer.innerHTML = '';
+      message.textContent = '';
+      message.className = 'message';
+      nextBtn.style.display = 'none';
+      
+      for (let i = 0; i < currentWord.correct.length; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'slot-dot';
+        dot.dataset.index = i;
+        slotsIndicator.appendChild(dot);
+      }
+      
+      const shuffledLetters = shuffleArray(currentWord.letters);
+      shuffledLetters.forEach((letter, index) => {
+        const tile = document.createElement('div');
+        tile.className = 'letter-tile';
+        tile.textContent = letter;
+        tile.dataset.letter = letter;
+        tile.dataset.index = index;
+        tile.addEventListener('click', () => handleLetterClick(tile));
+        lettersContainer.appendChild(tile);
+      });
+    }
+
+    function handleLetterClick(tile) {
+      if (tile.classList.contains('used')) return;
+      
+      playClickSound();
+      
+      const letter = tile.dataset.letter;
+      userAnswer.push(letter);
+      tile.classList.add('used');
+      
+      updateWordDisplay();
+    }
+    
+    function updateWordDisplay() {
+      const combinedWord = document.getElementById('combined-word');
+      const wordBox = document.getElementById('word-box');
+      const dots = document.querySelectorAll('.slot-dot');
+      
+      if (userAnswer.length > 0) {
+        combinedWord.textContent = userAnswer.join('');
+        wordBox.classList.add('has-letters');
+      } else {
+        combinedWord.textContent = '؟';
+        wordBox.classList.remove('has-letters');
+      }
+      
+      dots.forEach((dot, index) => {
+        if (index < userAnswer.length) {
+          dot.classList.add('filled');
+        } else {
+          dot.classList.remove('filled');
+        }
+      });
+    }
+
+    function clearAnswer() {
+      playClickSound();
+      userAnswer = [];
+      
+      updateWordDisplay();
+      
+      const tiles = document.querySelectorAll('.letter-tile');
+      tiles.forEach(tile => {
+        tile.classList.remove('used');
+      });
+      
+      const message = document.getElementById('message');
+      message.textContent = '';
+      message.className = 'message';
+    }
+
+    function checkAnswer() {
+      const answer = userAnswer.join('');
+      const message = document.getElementById('message');
+      const config = window.elementSdk?.config || defaultConfig;
+      const nextBtn = document.getElementById('next-btn');
+      
+      if (answer.length !== currentWord.correct.length) {
+        message.textContent = 'أكمل الكلمة أولاً!';
+        message.className = 'message wrong';
+        playWrongSound();
+        return;
+      }
+      
+      if (answer === currentWord.correct) {
+        message.textContent = config.correct_message || defaultConfig.correct_message;
+        message.className = 'message correct';
+        playCorrectSound();
+        
+        const wordBox = document.getElementById('word-box');
+        wordBox.classList.add('celebrate');
+        setTimeout(() => wordBox.classList.remove('celebrate'), 600);
+        
+        nextBtn.style.display = 'inline-block';
+      } else {
+        message.textContent = config.wrong_message || defaultConfig.wrong_message;
+        message.className = 'message wrong';
+        playWrongSound();
+        
+        setTimeout(() => {
+          clearAnswer();
+        }, 1000);
+      }
+    }
+
+    async function onConfigChange(config) {
+      document.getElementById('game-title').textContent = config.game_title || defaultConfig.game_title;
+      document.getElementById('next-btn').textContent = config.next_button_text || defaultConfig.next_button_text;
+      
+      document.body.style.background = `linear-gradient(135deg, ${config.background_color || defaultConfig.background_color} 0%, ${config.secondary_color || defaultConfig.secondary_color} 100%)`;
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.background_color || defaultConfig.background_color,
+              set: (value) => {
+                config.background_color = value;
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            },
+            {
+              get: () => config.secondary_color || defaultConfig.secondary_color,
+              set: (value) => {
+                config.secondary_color = value;
+                window.elementSdk.setConfig({ secondary_color: value });
+              }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => {
+                config.text_color = value;
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            }
+          ],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ["game_title", config.game_title || defaultConfig.game_title],
+          ["correct_message", config.correct_message || defaultConfig.correct_message],
+          ["wrong_message", config.wrong_message || defaultConfig.wrong_message],
+          ["next_button_text", config.next_button_text || defaultConfig.next_button_text]
+        ])
+      });
+    }
+
+    document.getElementById('clear-btn').addEventListener('click', clearAnswer);
+    document.getElementById('check-btn').addEventListener('click', checkAnswer);
+    document.getElementById('next-btn').addEventListener('click', loadNewWord);
+
+    loadNewWord();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a1050d3e048a5cf',t:'MTc2MzU2MTY4NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
