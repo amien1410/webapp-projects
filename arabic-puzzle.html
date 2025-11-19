@@ -1,10 +1,9 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
- <head>
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Arabic Word Puzzle Game</title>
-  <script src="/_sdk/element_sdk.js"></script>
+  <title>لعبة ترتيب الكلمات للأطفال</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap');
 
@@ -16,92 +15,244 @@
 
     html, body {
       height: 100%;
-      box-sizing: border-box;
     }
 
     body {
       font-family: 'Vazirmatn', 'Cairo', 'Segoe UI', Tahoma, sans-serif;
-      background: linear-gradient(135deg, #FFD93D 0%, #FF6B9D 50%, #C44569 100%);
+      background: linear-gradient(135deg, #87CEEB 0%, #98D8E8 50%, #B0E0E6 100%);
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100%;
+      min-height: 100vh;
       padding: 20px;
       position: relative;
-      overflow: hidden;
+      overflow-x: hidden;
     }
 
-    body::before {
+    /* Floating clouds animation */
+    .cloud {
+      position: absolute;
+      background: white;
+      border-radius: 100px;
+      opacity: 0.7;
+      animation: float 20s infinite ease-in-out;
+    }
+
+    .cloud:before, .cloud:after {
       content: '';
       position: absolute;
-      width: 200px;
-      height: 200px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 50%;
-      top: -50px;
-      left: -50px;
+      background: white;
+      border-radius: 100px;
     }
 
-    body::after {
-      content: '';
+    .cloud-1 {
+      width: 100px;
+      height: 40px;
+      top: 10%;
+      left: -100px;
+      animation-delay: 0s;
+    }
+
+    .cloud-2 {
+      width: 80px;
+      height: 35px;
+      top: 30%;
+      left: -80px;
+      animation-delay: 5s;
+    }
+
+    .cloud-3 {
+      width: 120px;
+      height: 45px;
+      top: 60%;
+      left: -120px;
+      animation-delay: 10s;
+    }
+
+    @keyframes float {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(calc(100vw + 200px)); }
+    }
+
+    /* Stars decoration */
+    .star {
       position: absolute;
-      width: 300px;
-      height: 300px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 50%;
-      bottom: -100px;
-      right: -100px;
+      font-size: 1.5em;
+      animation: twinkle 2s ease-in-out infinite;
     }
 
-    .game-container {
-      background: linear-gradient(135deg, #FFF5E4 0%, #FFEAA7 100%);
+    @keyframes twinkle {
+      0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+      50% { opacity: 0.3; transform: scale(1.3) rotate(180deg); }
+    }
+
+    .container {
+      background: linear-gradient(135deg, #FFF9E6 0%, #FFFACD 100%);
       border-radius: 30px;
       padding: 40px;
-      max-width: 650px;
+      max-width: 700px;
       width: 100%;
-      box-shadow: 0 20px 60px rgba(196, 69, 105, 0.4);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
       border: 6px solid white;
       position: relative;
       z-index: 1;
     }
 
-    .game-container::before {
-      content: '⭐';
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      font-size: 2em;
-      animation: twinkle 2s ease-in-out infinite;
-    }
-
-    .game-container::after {
-      content: '🌟';
-      position: absolute;
-      bottom: 20px;
-      left: 20px;
-      font-size: 2em;
-      animation: twinkle 2s ease-in-out infinite 1s;
-    }
-
-    @keyframes twinkle {
-      0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
-      50% { opacity: 0.5; transform: scale(1.2) rotate(180deg); }
-    }
-
-    h1 {
+    /* Welcome Screen */
+    .welcome-screen {
       text-align: center;
-      color: #C44569;
-      margin-bottom: 30px;
+    }
+
+    .welcome-screen h1 {
+      color: #FF6B9D;
       font-size: 2.8em;
       font-weight: 900;
+      margin-bottom: 20px;
       text-shadow: 3px 3px 0px #FFD93D;
-      letter-spacing: 2px;
+      animation: bounceIn 1s ease;
+    }
+
+    @keyframes bounceIn {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .welcome-emoji {
+      font-size: 5em;
+      margin: 20px 0;
+      animation: wave 2s ease-in-out infinite;
+    }
+
+    @keyframes wave {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-10deg); }
+      75% { transform: rotate(10deg); }
+    }
+
+    .input-group {
+      margin: 30px 0;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 1.5em;
+      font-weight: 700;
+      color: #6C5CE7;
+      margin-bottom: 10px;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 15px 20px;
+      font-size: 1.3em;
+      border: 4px solid #FF6B9D;
+      border-radius: 15px;
+      font-family: inherit;
+      text-align: center;
+      background: white;
+      transition: all 0.3s ease;
+    }
+
+    .input-group input:focus {
+      outline: none;
+      border-color: #6C5CE7;
+      box-shadow: 0 0 20px rgba(108, 92, 231, 0.3);
+      transform: scale(1.02);
+    }
+
+    .start-btn {
+      padding: 20px 50px;
+      font-size: 1.5em;
+      font-weight: 900;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      background: linear-gradient(135deg, #00D2FF 0%, #3A7BD5 100%);
+      color: white;
+      border: 4px solid white;
+      box-shadow: 0 8px 25px rgba(0, 210, 255, 0.5);
+      transition: all 0.3s ease;
+      font-family: inherit;
+      margin-top: 20px;
+    }
+
+    .start-btn:hover {
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 12px 35px rgba(0, 210, 255, 0.7);
+    }
+
+    .start-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Progress Bar */
+    .progress-container {
+      margin-bottom: 30px;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .student-name {
+      font-size: 1.3em;
+      font-weight: 700;
+      color: #6C5CE7;
+    }
+
+    .progress-text {
+      font-size: 1.2em;
+      font-weight: 700;
+      color: #FF6B9D;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 30px;
+      background: white;
+      border-radius: 15px;
+      border: 4px solid #FF6B9D;
+      overflow: hidden;
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #00D2FF 0%, #00E676 100%);
+      transition: width 0.5s ease;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 10px;
+      font-weight: 900;
+      color: white;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Game Screen */
+    .game-screen {
+      display: none;
+    }
+
+    h2 {
+      text-align: center;
+      color: #FF6B9D;
+      margin-bottom: 20px;
+      font-size: 2em;
+      font-weight: 900;
+      text-shadow: 2px 2px 0px #FFD93D;
     }
 
     .word-display {
       display: flex;
       justify-content: center;
-      margin-bottom: 40px;
+      margin-bottom: 30px;
       min-height: 100px;
       align-items: center;
     }
@@ -129,12 +280,12 @@
     .word-box.has-letters {
       background: linear-gradient(135deg, #6C5CE7 0%, #A29BFE 100%);
       border: 4px solid #6C5CE7;
-      transform: scale(1.08);
+      transform: scale(1.05);
       box-shadow: 0 8px 25px rgba(108, 92, 231, 0.4);
     }
 
     .combined-word {
-      font-size: 3.2em;
+      font-size: 3em;
       font-weight: 900;
       color: #FFD93D;
       letter-spacing: 2px;
@@ -149,13 +300,13 @@
 
     .slots-indicator {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       flex-direction: row-reverse;
     }
 
     .slot-dot {
-      width: 16px;
-      height: 16px;
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
       background: #FFD93D;
       border: 3px solid white;
@@ -166,38 +317,38 @@
     .slot-dot.filled {
       background: #00D2FF;
       border-color: #0099CC;
-      transform: scale(1.4);
+      transform: scale(1.3);
       box-shadow: 0 4px 15px rgba(0, 210, 255, 0.6);
-      animation: pulse 0.5s ease;
+      animation: pulse 0.4s ease;
     }
 
     @keyframes pulse {
-      0%, 100% { transform: scale(1.4); }
-      50% { transform: scale(1.6); }
+      0%, 100% { transform: scale(1.3); }
+      50% { transform: scale(1.5); }
     }
 
     .letters-container {
       display: flex;
       justify-content: center;
-      gap: 15px;
-      margin-bottom: 30px;
+      gap: 12px;
+      margin-bottom: 25px;
       flex-wrap: wrap;
     }
 
     .letter-tile {
-      width: 75px;
-      height: 75px;
+      width: 70px;
+      height: 70px;
       background: linear-gradient(135deg, #FF6B9D 0%, #FFD93D 100%);
-      border-radius: 18px;
+      border-radius: 15px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2.2em;
+      font-size: 2em;
       font-weight: 900;
       color: white;
       cursor: pointer;
       transition: all 0.3s ease;
-      box-shadow: 0 6px 20px rgba(255, 107, 157, 0.5);
+      box-shadow: 0 5px 15px rgba(255, 107, 157, 0.5);
       user-select: none;
       border: 4px solid white;
       text-shadow: 2px 2px 4px rgba(196, 69, 105, 0.5);
@@ -205,18 +356,18 @@
 
     .letter-tile:hover {
       transform: translateY(-8px) rotate(-5deg) scale(1.1);
-      box-shadow: 0 12px 35px rgba(255, 107, 157, 0.7);
+      box-shadow: 0 12px 30px rgba(255, 107, 157, 0.7);
     }
 
     .letter-tile:active {
-      transform: translateY(-4px) rotate(0deg) scale(1.05);
+      transform: translateY(-4px) scale(1.05);
     }
 
     .letter-tile.used {
-      opacity: 0.4;
+      opacity: 0.3;
       cursor: not-allowed;
       transform: scale(0.85);
-      filter: grayscale(50%);
+      filter: grayscale(70%);
     }
 
     .letter-tile.used:hover {
@@ -225,17 +376,18 @@
 
     .controls {
       display: flex;
-      gap: 15px;
+      gap: 12px;
       justify-content: center;
       margin-bottom: 20px;
+      flex-wrap: wrap;
     }
 
     button {
-      padding: 18px 35px;
+      padding: 15px 30px;
       font-size: 1.2em;
       font-weight: 900;
       border: none;
-      border-radius: 20px;
+      border-radius: 15px;
       cursor: pointer;
       transition: all 0.3s ease;
       font-family: inherit;
@@ -264,7 +416,6 @@
     }
 
     .clear-btn:hover {
-      background: linear-gradient(135deg, #FF8C00 0%, #FF4500 100%);
       transform: translateY(-4px) scale(1.05);
       box-shadow: 0 10px 30px rgba(255, 165, 0, 0.7);
     }
@@ -284,10 +435,10 @@
 
     .message {
       text-align: center;
-      font-size: 1.8em;
+      font-size: 1.6em;
       font-weight: 900;
-      margin-top: 20px;
-      min-height: 50px;
+      margin-top: 15px;
+      min-height: 45px;
       transition: all 0.3s ease;
       text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
     }
@@ -295,34 +446,33 @@
     .message.correct {
       color: #00E676;
       animation: bounce 0.6s ease;
-      font-size: 2em;
+      font-size: 1.8em;
     }
 
     .message.wrong {
       color: #FF4757;
       animation: shake 0.5s ease;
-      font-size: 1.8em;
     }
 
     @keyframes bounce {
       0%, 100% { transform: translateY(0); }
-      25% { transform: translateY(-20px); }
+      25% { transform: translateY(-15px); }
       50% { transform: translateY(0); }
-      75% { transform: translateY(-10px); }
+      75% { transform: translateY(-8px); }
     }
 
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-10px); }
-      50% { transform: translateX(10px); }
-      75% { transform: translateX(-5px); }
+      25% { transform: translateX(-8px); }
+      50% { transform: translateX(8px); }
+      75% { transform: translateX(-4px); }
     }
 
     @keyframes celebrate {
       0% { transform: scale(1) rotate(0deg); }
-      25% { transform: scale(1.2) rotate(5deg); }
-      50% { transform: scale(1.1) rotate(-5deg); }
-      75% { transform: scale(1.2) rotate(5deg); }
+      25% { transform: scale(1.15) rotate(3deg); }
+      50% { transform: scale(1.1) rotate(-3deg); }
+      75% { transform: scale(1.15) rotate(3deg); }
       100% { transform: scale(1) rotate(0deg); }
     }
 
@@ -330,8 +480,89 @@
       animation: celebrate 0.6s ease;
     }
 
+    /* Results Screen */
+    .results-screen {
+      display: none;
+      text-align: center;
+    }
+
+    .results-screen h1 {
+      color: #FF6B9D;
+      font-size: 2.5em;
+      font-weight: 900;
+      margin-bottom: 20px;
+      text-shadow: 3px 3px 0px #FFD93D;
+      animation: bounceIn 1s ease;
+    }
+
+    .trophy {
+      font-size: 8em;
+      margin: 20px 0;
+      animation: trophy-spin 2s ease-in-out;
+    }
+
+    @keyframes trophy-spin {
+      0% { transform: scale(0) rotate(-180deg); }
+      60% { transform: scale(1.2) rotate(20deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+
+    .score-display {
+      background: linear-gradient(135deg, #6C5CE7 0%, #A29BFE 100%);
+      border-radius: 20px;
+      padding: 30px;
+      margin: 30px 0;
+      border: 4px solid white;
+      box-shadow: 0 8px 25px rgba(108, 92, 231, 0.4);
+    }
+
+    .score-display h2 {
+      color: white;
+      font-size: 2em;
+      margin-bottom: 15px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .score-number {
+      font-size: 4em;
+      font-weight: 900;
+      color: #FFD93D;
+      text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.2);
+    }
+
+    .encouragement {
+      font-size: 1.5em;
+      color: #6C5CE7;
+      font-weight: 700;
+      margin: 20px 0;
+      padding: 15px;
+      background: white;
+      border-radius: 15px;
+      border: 3px solid #FF6B9D;
+    }
+
+    .restart-btn {
+      padding: 20px 50px;
+      font-size: 1.5em;
+      font-weight: 900;
+      background: linear-gradient(135deg, #00E676 0%, #00C853 100%);
+      color: white;
+      border: 4px solid white;
+      box-shadow: 0 8px 25px rgba(0, 230, 118, 0.5);
+      margin-top: 20px;
+    }
+
+    .restart-btn:hover {
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 12px 35px rgba(0, 230, 118, 0.7);
+    }
+
+    .hidden {
+      display: none;
+    }
+
     @media (max-width: 640px) {
-      .game-container {
+      .container {
         padding: 20px;
       }
 
@@ -339,64 +570,142 @@
         font-size: 1.8em;
       }
 
-      .letter-slot, .letter-tile {
+      .letter-tile {
         width: 60px;
         height: 60px;
         font-size: 1.8em;
       }
+
+      button {
+        padding: 12px 20px;
+        font-size: 1em;
+      }
     }
   </style>
-  <style>@view-transition { navigation: auto; }</style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
-  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
- </head>
- <body>
-  <main>
-   <div class="game-container">
-    <h1 id="game-title">لعبة ترتيب الكلمات</h1>
-    <div class="word-display">
-     <div class="word-container">
-      <div class="word-box" id="word-box">
-       <div class="combined-word" id="combined-word">
-        ؟
-       </div>
+</head>
+<body>
+  <!-- Decorative clouds -->
+  <div class="cloud cloud-1"></div>
+  <div class="cloud cloud-2"></div>
+  <div class="cloud cloud-3"></div>
+
+  <!-- Stars decoration -->
+  <div class="star" style="top: 15%; right: 10%;">⭐</div>
+  <div class="star" style="top: 70%; right: 15%; animation-delay: 1s;">✨</div>
+  <div class="star" style="top: 25%; left: 12%; animation-delay: 0.5s;">🌟</div>
+  <div class="star" style="bottom: 20%; left: 18%; animation-delay: 1.5s;">⭐</div>
+
+  <div class="container">
+    <!-- Welcome Screen -->
+    <div class="welcome-screen" id="welcomeScreen">
+      <h1>🎮 لعبة ترتيب الكلمات 🎮</h1>
+      <div class="welcome-emoji">👋</div>
+      <div class="input-group">
+        <label>ما اسمك؟</label>
+        <input type="text" id="studentName" placeholder="اكتب اسمك هنا" maxlength="20">
       </div>
-      <div class="slots-indicator" id="slots-indicator"></div>
-     </div>
+      <button class="start-btn" id="startBtn" disabled>ابدأ اللعبة! 🚀</button>
     </div>
-    <div class="letters-container" id="letters-container"></div>
-    <div class="controls"><button class="clear-btn" id="clear-btn">مسح</button> <button class="check-btn" id="check-btn">تحقق</button> <button class="next-btn" id="next-btn">كلمة جديدة</button>
+
+    <!-- Game Screen -->
+    <div class="game-screen" id="gameScreen">
+      <div class="progress-container">
+        <div class="progress-info">
+          <div class="student-name" id="displayName">🎓 الطالب: </div>
+          <div class="progress-text" id="progressText">السؤال 1 من 7</div>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressBar">0%</div>
+        </div>
+      </div>
+
+      <h2>رتب الحروف لتكوين الكلمة</h2>
+      <div class="word-display">
+        <div class="word-container">
+          <div class="word-box" id="wordBox">
+            <div class="combined-word" id="combinedWord">؟</div>
+          </div>
+          <div class="slots-indicator" id="slotsIndicator"></div>
+        </div>
+      </div>
+      <div class="letters-container" id="lettersContainer"></div>
+      <div class="controls">
+        <button class="clear-btn" id="clearBtn">مسح 🗑️</button>
+        <button class="check-btn" id="checkBtn">تحقق ✓</button>
+        <button class="next-btn" id="nextBtn">التالي ➡️</button>
+      </div>
+      <div class="message" id="message"></div>
     </div>
-    <div class="message" id="message"></div>
-   </div>
-  </main>
+
+    <!-- Results Screen -->
+    <div class="results-screen" id="resultsScreen">
+      <h1>🎊 النتيجة النهائية 🎊</h1>
+      <div class="trophy">🏆</div>
+      <div class="score-display">
+        <h2 id="finalStudentName"></h2>
+        <div class="score-number" id="finalScore">0/7</div>
+      </div>
+      <div class="encouragement" id="encouragement"></div>
+      <button class="restart-btn" id="restartBtn">العب مرة أخرى! 🔄</button>
+    </div>
+  </div>
+
   <script>
-    const defaultConfig = {
-      game_title: "لعبة ترتيب الكلمات",
-      correct_message: "ممتاز! ا��إجابة صحيحة! 🎉",
-      wrong_message: "حاول مرة أخرى! 🤔",
-      next_button_text: "كلمة جديدة",
-      background_color: "#667eea",
-      secondary_color: "#764ba2",
-      tile_color: "#f5576c",
-      text_color: "#2d3748",
-      success_color: "#48bb78"
+    // Game configuration - easily editable
+    const gameConfig = {
+      words: [
+        { letters: ['ط', 'ا', 'ل', 'ب'], correct: 'طالب' },
+        { letters: ['ك', 'ت', 'ا', 'ب'], correct: 'كتاب' },
+        { letters: ['م', 'د', 'ر', 'س', 'ة'], correct: 'مدرسة' },
+        { letters: ['ق', 'ل', 'م'], correct: 'قلم' },
+        { letters: ['ب', 'ي', 'ت'], correct: 'بيت' },
+        { letters: ['ش', 'م', 'س'], correct: 'شمس' },
+        { letters: ['و', 'ر', 'د', 'ة'], correct: 'وردة' }
+      ],
+      messages: {
+        correct: 'ممتاز! الإجابة صحيحة! 🎉',
+        wrong: 'حاول مرة أخرى! 🤔',
+        incomplete: 'أكمل الكلمة أولاً! 📝'
+      },
+      encouragements: {
+        perfect: 'رائع جداً! أنت بطل! 🏆',
+        excellent: 'ممتاز! عمل رائع! 🌟',
+        good: 'جيد جداً! استمر! 👍',
+        tryAgain: 'جيد! حاول مرة أخرى! 💪'
+      }
     };
 
-    const words = [
-      { letters: ['ط', 'ل', 'ا', 'ب'], correct: 'طالب' },
-      { letters: ['ك', 'ت', 'ا', 'ب'], correct: 'كتاب' },
-      { letters: ['م', 'د', 'ر', 'س', 'ة'], correct: 'مدرسة' },
-      { letters: ['ق', 'ل', 'م'], correct: 'قلم' },
-      { letters: ['ب', 'ي', 'ت'], correct: 'بيت' },
-      { letters: ['ش', 'م', 'س'], correct: 'شمس' },
-      { letters: ['و', 'ر', 'د', 'ة'], correct: 'وردة' }
-    ];
-
+    // Game state
+    let studentName = '';
+    let currentWordIndex = 0;
     let currentWord = null;
     let userAnswer = [];
+    let correctAnswers = 0;
     let audioContext = null;
 
+    // DOM elements
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    const gameScreen = document.getElementById('gameScreen');
+    const resultsScreen = document.getElementById('resultsScreen');
+    const studentNameInput = document.getElementById('studentName');
+    const startBtn = document.getElementById('startBtn');
+    const displayName = document.getElementById('displayName');
+    const progressText = document.getElementById('progressText');
+    const progressBar = document.getElementById('progressBar');
+    const combinedWord = document.getElementById('combinedWord');
+    const wordBox = document.getElementById('wordBox');
+    const slotsIndicator = document.getElementById('slotsIndicator');
+    const lettersContainer = document.getElementById('lettersContainer');
+    const message = document.getElementById('message');
+    const clearBtn = document.getElementById('clearBtn');
+    const checkBtn = document.getElementById('checkBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const finalStudentName = document.getElementById('finalStudentName');
+    const finalScore = document.getElementById('finalScore');
+    const encouragement = document.getElementById('encouragement');
+    const restartBtn = document.getElementById('restartBtn');
+
+    // Audio functions
     function initAudio() {
       if (!audioContext) {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -414,7 +723,7 @@
       oscillator.frequency.value = frequency;
       oscillator.type = type;
       
-      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
       
       oscillator.start(audioContext.currentTime);
@@ -422,20 +731,56 @@
     }
 
     function playCorrectSound() {
-      playSound(523.25, 0.2);
-      setTimeout(() => playSound(659.25, 0.2), 150);
-      setTimeout(() => playSound(783.99, 0.3), 300);
+      playSound(523.25, 0.15);
+      setTimeout(() => playSound(659.25, 0.15), 100);
+      setTimeout(() => playSound(783.99, 0.25), 200);
     }
 
     function playWrongSound() {
-      playSound(200, 0.15, 'sawtooth');
-      setTimeout(() => playSound(150, 0.3, 'sawtooth'), 150);
+      playSound(200, 0.12, 'sawtooth');
+      setTimeout(() => playSound(150, 0.25, 'sawtooth'), 120);
     }
 
     function playClickSound() {
-      playSound(400, 0.1, 'square');
+      playSound(400, 0.08, 'square');
     }
 
+    function playWinSound() {
+      const notes = [523.25, 587.33, 659.25, 783.99, 880.00];
+      notes.forEach((note, i) => {
+        setTimeout(() => playSound(note, 0.2), i * 100);
+      });
+    }
+
+    // Enable start button when name is entered
+    studentNameInput.addEventListener('input', (e) => {
+      startBtn.disabled = e.target.value.trim().length === 0;
+    });
+
+    studentNameInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && !startBtn.disabled) {
+        startGame();
+      }
+    });
+
+    // Start game
+    startBtn.addEventListener('click', startGame);
+
+    function startGame() {
+      studentName = studentNameInput.value.trim();
+      if (!studentName) return;
+
+      playClickSound();
+      welcomeScreen.classList.add('hidden');
+      gameScreen.style.display = 'block';
+      displayName.textContent = `🎓 الطالب: ${studentName}`;
+      
+      currentWordIndex = 0;
+      correctAnswers = 0;
+      loadWord();
+    }
+
+    // Shuffle array
     function shuffleArray(array) {
       const newArray = [...array];
       for (let i = newArray.length - 1; i > 0; i--) {
@@ -445,17 +790,23 @@
       return newArray;
     }
 
-    function loadNewWord() {
-      currentWord = words[Math.floor(Math.random() * words.length)];
+    // Load word
+    function loadWord() {
+      if (currentWordIndex >= gameConfig.words.length) {
+        showResults();
+        return;
+      }
+
+      currentWord = gameConfig.words[currentWordIndex];
       userAnswer = [];
       
-      const combinedWord = document.getElementById('combined-word');
-      const wordBox = document.getElementById('word-box');
-      const slotsIndicator = document.getElementById('slots-indicator');
-      const lettersContainer = document.getElementById('letters-container');
-      const message = document.getElementById('message');
-      const nextBtn = document.getElementById('next-btn');
+      // Update progress
+      const progress = ((currentWordIndex) / gameConfig.words.length) * 100;
+      progressBar.style.width = progress + '%';
+      progressBar.textContent = Math.round(progress) + '%';
+      progressText.textContent = `السؤال ${currentWordIndex + 1} من ${gameConfig.words.length}`;
       
+      // Reset UI
       combinedWord.textContent = '؟';
       wordBox.classList.remove('has-letters');
       slotsIndicator.innerHTML = '';
@@ -464,25 +815,26 @@
       message.className = 'message';
       nextBtn.style.display = 'none';
       
+      // Create slots
       for (let i = 0; i < currentWord.correct.length; i++) {
         const dot = document.createElement('div');
         dot.className = 'slot-dot';
-        dot.dataset.index = i;
         slotsIndicator.appendChild(dot);
       }
       
+      // Create letter tiles
       const shuffledLetters = shuffleArray(currentWord.letters);
       shuffledLetters.forEach((letter, index) => {
         const tile = document.createElement('div');
         tile.className = 'letter-tile';
         tile.textContent = letter;
         tile.dataset.letter = letter;
-        tile.dataset.index = index;
         tile.addEventListener('click', () => handleLetterClick(tile));
         lettersContainer.appendChild(tile);
       });
     }
 
+    // Handle letter click
     function handleLetterClick(tile) {
       if (tile.classList.contains('used')) return;
       
@@ -495,9 +847,8 @@
       updateWordDisplay();
     }
     
+    // Update word display
     function updateWordDisplay() {
-      const combinedWord = document.getElementById('combined-word');
-      const wordBox = document.getElementById('word-box');
       const dots = document.querySelectorAll('.slot-dot');
       
       if (userAnswer.length > 0) {
@@ -517,6 +868,9 @@
       });
     }
 
+    // Clear answer
+    clearBtn.addEventListener('click', clearAnswer);
+    
     function clearAnswer() {
       playClickSound();
       userAnswer = [];
@@ -528,98 +882,92 @@
         tile.classList.remove('used');
       });
       
-      const message = document.getElementById('message');
       message.textContent = '';
       message.className = 'message';
     }
 
+    // Check answer
+    checkBtn.addEventListener('click', checkAnswer);
+    
     function checkAnswer() {
       const answer = userAnswer.join('');
-      const message = document.getElementById('message');
-      const config = window.elementSdk?.config || defaultConfig;
-      const nextBtn = document.getElementById('next-btn');
       
       if (answer.length !== currentWord.correct.length) {
-        message.textContent = 'أكمل الكلمة أولاً!';
+        message.textContent = gameConfig.messages.incomplete;
         message.className = 'message wrong';
         playWrongSound();
         return;
       }
       
       if (answer === currentWord.correct) {
-        message.textContent = config.correct_message || defaultConfig.correct_message;
+        message.textContent = gameConfig.messages.correct;
         message.className = 'message correct';
         playCorrectSound();
+        correctAnswers++;
         
-        const wordBox = document.getElementById('word-box');
         wordBox.classList.add('celebrate');
         setTimeout(() => wordBox.classList.remove('celebrate'), 600);
         
         nextBtn.style.display = 'inline-block';
+        checkBtn.disabled = true;
       } else {
-        message.textContent = config.wrong_message || defaultConfig.wrong_message;
+        message.textContent = gameConfig.messages.wrong;
         message.className = 'message wrong';
         playWrongSound();
         
         setTimeout(() => {
           clearAnswer();
-        }, 1000);
+        }, 1200);
       }
     }
 
-    async function onConfigChange(config) {
-      document.getElementById('game-title').textContent = config.game_title || defaultConfig.game_title;
-      document.getElementById('next-btn').textContent = config.next_button_text || defaultConfig.next_button_text;
+    // Next question
+    nextBtn.addEventListener('click', () => {
+      playClickSound();
+      currentWordIndex++;
+      checkBtn.disabled = false;
+      loadWord();
+    });
+
+    // Show results
+    function showResults() {
+      playWinSound();
       
-      document.body.style.background = `linear-gradient(135deg, ${config.background_color || defaultConfig.background_color} 0%, ${config.secondary_color || defaultConfig.secondary_color} 50%, #C44569 100%)`;
+      gameScreen.style.display = 'none';
+      resultsScreen.style.display = 'block';
+      
+      finalStudentName.textContent = studentName;
+      finalScore.textContent = `${correctAnswers}/${gameConfig.words.length}`;
+      
+      // Set encouragement based on score
+      const percentage = (correctAnswers / gameConfig.words.length) * 100;
+      if (percentage === 100) {
+        encouragement.textContent = gameConfig.encouragements.perfect;
+      } else if (percentage >= 75) {
+        encouragement.textContent = gameConfig.encouragements.excellent;
+      } else if (percentage >= 50) {
+        encouragement.textContent = gameConfig.encouragements.good;
+      } else {
+        encouragement.textContent = gameConfig.encouragements.tryAgain;
+      }
+      
+      // Update progress to 100%
+      progressBar.style.width = '100%';
+      progressBar.textContent = '100%';
     }
 
-    if (window.elementSdk) {
-      window.elementSdk.init({
-        defaultConfig,
-        onConfigChange,
-        mapToCapabilities: (config) => ({
-          recolorables: [
-            {
-              get: () => config.background_color || defaultConfig.background_color,
-              set: (value) => {
-                config.background_color = value;
-                window.elementSdk.setConfig({ background_color: value });
-              }
-            },
-            {
-              get: () => config.secondary_color || defaultConfig.secondary_color,
-              set: (value) => {
-                config.secondary_color = value;
-                window.elementSdk.setConfig({ secondary_color: value });
-              }
-            },
-            {
-              get: () => config.text_color || defaultConfig.text_color,
-              set: (value) => {
-                config.text_color = value;
-                window.elementSdk.setConfig({ text_color: value });
-              }
-            }
-          ],
-          borderables: [],
-          fontEditable: undefined,
-          fontSizeable: undefined
-        }),
-        mapToEditPanelValues: (config) => new Map([
-          ["game_title", config.game_title || defaultConfig.game_title],
-          ["correct_message", config.correct_message || defaultConfig.correct_message],
-          ["wrong_message", config.wrong_message || defaultConfig.wrong_message],
-          ["next_button_text", config.next_button_text || defaultConfig.next_button_text]
-        ])
-      });
-    }
-
-    document.getElementById('clear-btn').addEventListener('click', clearAnswer);
-    document.getElementById('check-btn').addEventListener('click', checkAnswer);
-    document.getElementById('next-btn').addEventListener('click', loadNewWord);
-
-    loadNewWord();
+    // Restart game
+    restartBtn.addEventListener('click', () => {
+      playClickSound();
+      
+      resultsScreen.style.display = 'none';
+      welcomeScreen.classList.remove('hidden');
+      
+      studentNameInput.value = '';
+      startBtn.disabled = true;
+      currentWordIndex = 0;
+      correctAnswers = 0;
+    });
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a105c22d5474088',t:'MTc2MzU2MjE0OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
