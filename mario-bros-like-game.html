@@ -1,0 +1,912 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Islamic Civilization Platformer</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: 'Arial', sans-serif;
+      height: 100%;
+    }
+    
+    html {
+      height: 100%;
+    }
+    
+    #gameContainer {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      background: linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 100%);
+    }
+    
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+    
+    #ui {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: white;
+      font-size: 24px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+      z-index: 10;
+      font-weight: bold;
+    }
+    
+    #instructions {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 15px 30px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 16px;
+      z-index: 10;
+    }
+    
+    #victoryScreen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 100;
+    }
+    
+    #victoryScreen.active {
+      display: flex;
+    }
+    
+    #victoryScreen h1 {
+      color: #FFD700;
+      font-size: 48px;
+      margin-bottom: 20px;
+      text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
+    }
+    
+    #victoryScreen p {
+      color: white;
+      font-size: 24px;
+      margin-bottom: 30px;
+    }
+    
+    #victoryScreen button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      font-size: 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    
+    #victoryScreen button:hover {
+      background: #45a049;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <main id="gameContainer">
+   <div id="ui">
+    <div id="scoreDisplay">
+     Score: 0
+    </div>
+    <div id="levelDisplay">
+     Level: Main
+    </div>
+   </div>
+   <canvas id="gameCanvas"></canvas>
+   <div id="instructions">
+    Arrow Keys: Move | Space: Jump | Down Arrow: Enter Pipes | Up Arrow: Enter Palace
+   </div>
+   <div id="victoryScreen">
+    <h1 id="victoryTitle">🏆 Victory! 🏆</h1>
+    <p id="victoryMessage">You've completed the adventure!</p><button id="restartButton">Play Again</button>
+   </div>
+  </main>
+  <script>
+    const defaultConfig = {
+      background_color: "#87CEEB",
+      ground_color: "#8B4513",
+      platform_color: "#D2691E",
+      character_color: "#FF6B6B",
+      coin_color: "#FFD700",
+      game_title: "Islamic Adventure",
+      character_name: "Hero",
+      victory_message: "You've completed the adventure!",
+      font_family: "Arial",
+      font_size: 16
+    };
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    let canvasWidth = window.innerWidth;
+    let canvasHeight = window.innerHeight;
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+
+    // Game state
+    let score = 0;
+    let currentLevel = 'main';
+    let levelCompleted = {
+      level1: false,
+      level2: false,
+      level3: false
+    };
+
+    // Player
+    const player = {
+      x: 100,
+      y: 0,
+      width: 32,
+      height: 32,
+      velocityX: 0,
+      velocityY: 0,
+      speed: 5,
+      jumpPower: 12,
+      grounded: false,
+      direction: 1
+    };
+
+    // Input
+    const keys = {};
+    
+    // Level definitions
+    const levels = {
+      main: {
+        name: 'Main',
+        skyGradient: ['#87CEEB', '#E0F6FF'], // Day sky
+        platforms: [
+          {x: 0, y: 500, width: 300, height: 20},
+          {x: 400, y: 450, width: 200, height: 20},
+          {x: 700, y: 400, width: 200, height: 20},
+          {x: 1000, y: 350, width: 200, height: 20},
+          {x: 1300, y: 300, width: 300, height: 20},
+          {x: 1700, y: 250, width: 200, height: 20},
+          {x: 2000, y: 250, width: 400, height: 20}
+        ],
+        ground: {x: 0, y: 550, width: 3000, height: 100},
+        pipes: [
+          {x: 500, y: 400, width: 60, height: 80, level: 'level1', color: '#2E8B57'},
+          {x: 900, y: 300, width: 60, height: 80, level: 'level2', color: '#4169E1'},
+          {x: 1400, y: 250, width: 60, height: 80, level: 'level3', color: '#9370DB'}
+        ],
+        palace: {x: 2100, y: 130, width: 120, height: 120},
+        coins: [
+          {x: 450, y: 410, collected: false},
+          {x: 750, y: 360, collected: false},
+          {x: 1050, y: 310, collected: false},
+          {x: 1350, y: 260, collected: false},
+          {x: 1750, y: 210, collected: false}
+        ]
+      },
+      level1: {
+        name: 'Desert Temple',
+        skyGradient: ['#FF6B6B', '#FFA07A'], // Sunset
+        platforms: [
+          {x: 200, y: 450, width: 150, height: 20},
+          {x: 450, y: 380, width: 150, height: 20},
+          {x: 700, y: 310, width: 150, height: 20},
+          {x: 950, y: 240, width: 150, height: 20}
+        ],
+        ground: {x: 0, y: 550, width: 1500, height: 100},
+        returnPipe: {x: 1200, y: 190, width: 60, height: 80, color: '#2E8B57'},
+        coins: [
+          {x: 250, y: 410, collected: false},
+          {x: 500, y: 340, collected: false},
+          {x: 750, y: 270, collected: false},
+          {x: 1000, y: 200, collected: false}
+        ]
+      },
+      level2: {
+        name: 'Minaret Heights',
+        skyGradient: ['#4A5568', '#2D3748'], // Dusk
+        platforms: [
+          {x: 150, y: 480, width: 120, height: 20},
+          {x: 350, y: 420, width: 120, height: 20},
+          {x: 550, y: 360, width: 120, height: 20},
+          {x: 350, y: 300, width: 120, height: 20},
+          {x: 550, y: 240, width: 120, height: 20},
+          {x: 800, y: 200, width: 200, height: 20}
+        ],
+        ground: {x: 0, y: 550, width: 1500, height: 100},
+        returnPipe: {x: 900, y: 150, width: 60, height: 80, color: '#4169E1'},
+        coins: [
+          {x: 200, y: 440, collected: false},
+          {x: 400, y: 380, collected: false},
+          {x: 600, y: 320, collected: false},
+          {x: 850, y: 160, collected: false}
+        ]
+      },
+      level3: {
+        name: 'Garden Paradise',
+        skyGradient: ['#1A202C', '#2D3748'], // Night
+        platforms: [
+          {x: 250, y: 460, width: 100, height: 20},
+          {x: 450, y: 400, width: 100, height: 20},
+          {x: 250, y: 340, width: 100, height: 20},
+          {x: 450, y: 280, width: 100, height: 20},
+          {x: 650, y: 220, width: 100, height: 20},
+          {x: 850, y: 280, width: 100, height: 20},
+          {x: 1050, y: 220, width: 150, height: 20}
+        ],
+        ground: {x: 0, y: 550, width: 1500, height: 100},
+        returnPipe: {x: 1100, y: 170, width: 60, height: 80, color: '#9370DB'},
+        coins: [
+          {x: 300, y: 420, collected: false},
+          {x: 500, y: 360, collected: false},
+          {x: 700, y: 180, collected: false},
+          {x: 900, y: 240, collected: false},
+          {x: 1100, y: 180, collected: false}
+        ]
+      },
+      final: {
+        name: 'Grand Palace',
+        skyGradient: ['#0F172A', '#1E293B'], // Midnight
+        platforms: [
+          {x: 300, y: 450, width: 200, height: 20},
+          {x: 600, y: 380, width: 200, height: 20},
+          {x: 300, y: 310, width: 200, height: 20},
+          {x: 600, y: 240, width: 200, height: 20},
+          {x: 900, y: 200, width: 250, height: 20}
+        ],
+        ground: {x: 0, y: 550, width: 1500, height: 100},
+        trophy: {x: 1000, y: 140, width: 40, height: 50},
+        coins: [
+          {x: 400, y: 410, collected: false},
+          {x: 700, y: 340, collected: false},
+          {x: 400, y: 270, collected: false},
+          {x: 700, y: 200, collected: false},
+          {x: 1000, y: 160, collected: false}
+        ]
+      }
+    };
+
+    let camera = {x: 0, y: 0};
+
+    // Background music using Web Audio API
+    let audioContext;
+    let musicGainNode;
+    let musicPlaying = false;
+
+    function initAudio() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        musicGainNode = audioContext.createGain();
+        musicGainNode.gain.value = 0.3;
+        musicGainNode.connect(audioContext.destination);
+      }
+    }
+
+    function playBackgroundMusic() {
+      if (!audioContext || musicPlaying) return;
+      
+      musicPlaying = true;
+      const now = audioContext.currentTime;
+      
+      // Create a simple Arabian-inspired melody
+      const notes = [
+        {freq: 440, start: 0, duration: 0.5},
+        {freq: 494, start: 0.5, duration: 0.5},
+        {freq: 523, start: 1, duration: 0.5},
+        {freq: 587, start: 1.5, duration: 0.5},
+        {freq: 523, start: 2, duration: 0.5},
+        {freq: 494, start: 2.5, duration: 0.5},
+        {freq: 440, start: 3, duration: 1}
+      ];
+      
+      function playMelody() {
+        if (!musicPlaying) return;
+        
+        const startTime = audioContext.currentTime;
+        
+        notes.forEach(note => {
+          const oscillator = audioContext.createOscillator();
+          const noteGain = audioContext.createGain();
+          
+          oscillator.type = 'sine';
+          oscillator.frequency.value = note.freq;
+          
+          noteGain.gain.setValueAtTime(0, startTime + note.start);
+          noteGain.gain.linearRampToValueAtTime(0.1, startTime + note.start + 0.05);
+          noteGain.gain.exponentialRampToValueAtTime(0.01, startTime + note.start + note.duration);
+          
+          oscillator.connect(noteGain);
+          noteGain.connect(musicGainNode);
+          
+          oscillator.start(startTime + note.start);
+          oscillator.stop(startTime + note.start + note.duration);
+        });
+        
+        setTimeout(playMelody, 4000);
+      }
+      
+      playMelody();
+    }
+
+    window.addEventListener('keydown', (e) => {
+      keys[e.code] = true;
+      if (e.code === 'Space') e.preventDefault();
+      
+      // Start music on first interaction
+      if (!musicPlaying) {
+        initAudio();
+        playBackgroundMusic();
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      keys[e.code] = false;
+    });
+
+    window.addEventListener('resize', () => {
+      canvasWidth = window.innerWidth;
+      canvasHeight = window.innerHeight;
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+    });
+
+    function drawIslamicPattern(x, y, size) {
+      ctx.save();
+      ctx.translate(x, y);
+      
+      // Star pattern
+      ctx.beginPath();
+      for (let i = 0; i < 8; i++) {
+        const angle = (i * Math.PI) / 4;
+        const radius = i % 2 === 0 ? size : size / 2;
+        const px = Math.cos(angle) * radius;
+        const py = Math.sin(angle) * radius;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(255, 215, 0, 0.3)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255, 215, 0, 0.6)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      ctx.restore();
+    }
+
+    function drawPalace(palace, cameraX) {
+      const x = palace.x - cameraX;
+      const y = palace.y;
+      const config = window.elementSdk ? window.elementSdk.config : defaultConfig;
+      
+      // Main structure
+      ctx.fillStyle = '#DEB887';
+      ctx.fillRect(x, y, palace.width, palace.height);
+      
+      // Dome
+      ctx.beginPath();
+      ctx.arc(x + palace.width / 2, y, palace.width / 3, Math.PI, 0);
+      ctx.fillStyle = '#DAA520';
+      ctx.fill();
+      ctx.strokeStyle = '#B8860B';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      
+      // Door
+      ctx.fillStyle = '#8B4513';
+      ctx.fillRect(x + palace.width / 2 - 20, y + palace.height - 50, 40, 50);
+      
+      // Windows
+      ctx.fillStyle = '#4682B4';
+      ctx.fillRect(x + 15, y + 30, 25, 30);
+      ctx.fillRect(x + palace.width - 40, y + 30, 25, 30);
+      
+      // Decorative patterns
+      drawIslamicPattern(x + palace.width / 2, y + palace.height / 2, 15);
+    }
+
+    function drawPipe(pipe, cameraX) {
+      const x = pipe.x - cameraX;
+      const y = pipe.y;
+      
+      // Pipe body
+      ctx.fillStyle = pipe.color;
+      ctx.fillRect(x, y, pipe.width, pipe.height);
+      
+      // Pipe rim
+      ctx.fillStyle = pipe.color;
+      ctx.globalAlpha = 0.7;
+      ctx.fillRect(x - 5, y - 10, pipe.width + 10, 15);
+      ctx.globalAlpha = 1;
+      
+      // Highlight
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.fillRect(x + 5, y + 5, 10, pipe.height - 10);
+      
+      // Shadow
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+      ctx.fillRect(x + pipe.width - 15, y + 5, 10, pipe.height - 10);
+    }
+
+    function drawPlayer(cameraX) {
+      const config = window.elementSdk ? window.elementSdk.config : defaultConfig;
+      const x = player.x - cameraX;
+      const y = player.y;
+      
+      // Body
+      ctx.fillStyle = config.character_color || defaultConfig.character_color;
+      ctx.fillRect(x, y + 8, player.width, player.height - 8);
+      
+      // Head
+      ctx.beginPath();
+      ctx.arc(x + player.width / 2, y + 8, 12, 0, Math.PI * 2);
+      ctx.fillStyle = '#FFE4B5';
+      ctx.fill();
+      
+      // Turban
+      ctx.beginPath();
+      ctx.arc(x + player.width / 2, y + 4, 12, Math.PI, 0, true);
+      ctx.fillStyle = config.character_color || defaultConfig.character_color;
+      ctx.fill();
+      
+      // Eyes
+      ctx.fillStyle = '#000';
+      ctx.fillRect(x + player.width / 2 - 6 + (player.direction > 0 ? 2 : -2), y + 6, 3, 3);
+      ctx.fillRect(x + player.width / 2 + 3 + (player.direction > 0 ? 2 : -2), y + 6, 3, 3);
+      
+      // Arms
+      ctx.strokeStyle = '#FFE4B5';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(x + 8, y + 16);
+      ctx.lineTo(x + 4, y + 24);
+      ctx.stroke();
+      
+      ctx.beginPath();
+      ctx.moveTo(x + player.width - 8, y + 16);
+      ctx.lineTo(x + player.width - 4, y + 24);
+      ctx.stroke();
+      
+      // Legs
+      ctx.beginPath();
+      ctx.moveTo(x + 12, y + player.height);
+      ctx.lineTo(x + 12, y + player.height + 4);
+      ctx.stroke();
+      
+      ctx.beginPath();
+      ctx.moveTo(x + player.width - 12, y + player.height);
+      ctx.lineTo(x + player.width - 12, y + player.height + 4);
+      ctx.stroke();
+    }
+
+    function drawCoin(coin, cameraX) {
+      if (coin.collected) return;
+      
+      const config = window.elementSdk ? window.elementSdk.config : defaultConfig;
+      const x = coin.x - cameraX;
+      const y = coin.y;
+      const time = Date.now() / 200;
+      const wobble = Math.sin(time) * 2;
+      
+      ctx.save();
+      ctx.translate(x, y);
+      
+      // Coin body
+      ctx.beginPath();
+      ctx.arc(0, wobble, 12, 0, Math.PI * 2);
+      ctx.fillStyle = config.coin_color || defaultConfig.coin_color;
+      ctx.fill();
+      ctx.strokeStyle = '#DAA520';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      // Inner detail
+      ctx.beginPath();
+      ctx.arc(0, wobble, 8, 0, Math.PI * 2);
+      ctx.strokeStyle = '#DAA520';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      
+      ctx.restore();
+    }
+
+    function drawTrophy(trophy, cameraX) {
+      const x = trophy.x - cameraX;
+      const y = trophy.y;
+      const time = Date.now() / 500;
+      const float = Math.sin(time) * 5;
+      
+      // Trophy base
+      ctx.fillStyle = '#FFD700';
+      ctx.fillRect(x + 10, y + 40 + float, 20, 10);
+      
+      // Trophy stem
+      ctx.fillRect(x + 17, y + 30 + float, 6, 10);
+      
+      // Trophy cup
+      ctx.beginPath();
+      ctx.moveTo(x + 5, y + 30 + float);
+      ctx.lineTo(x + 10, y + 10 + float);
+      ctx.lineTo(x + 30, y + 10 + float);
+      ctx.lineTo(x + 35, y + 30 + float);
+      ctx.closePath();
+      ctx.fillStyle = '#FFD700';
+      ctx.fill();
+      ctx.strokeStyle = '#DAA520';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      // Handles
+      ctx.beginPath();
+      ctx.arc(x + 8, y + 20 + float, 5, Math.PI / 2, -Math.PI / 2, true);
+      ctx.strokeStyle = '#DAA520';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      
+      ctx.beginPath();
+      ctx.arc(x + 32, y + 20 + float, 5, -Math.PI / 2, Math.PI / 2, true);
+      ctx.stroke();
+    }
+
+    function checkCollision(rect1, rect2) {
+      return rect1.x < rect2.x + rect2.width &&
+             rect1.x + rect1.width > rect2.x &&
+             rect1.y < rect2.y + rect2.height &&
+             rect1.y + rect1.height > rect2.y;
+    }
+
+    function update() {
+      const level = levels[currentLevel];
+      
+      // Player movement
+      if (keys['ArrowLeft']) {
+        player.velocityX = -player.speed;
+        player.direction = -1;
+      } else if (keys['ArrowRight']) {
+        player.velocityX = player.speed;
+        player.direction = 1;
+      } else {
+        player.velocityX = 0;
+      }
+      
+      if (keys['Space'] && player.grounded) {
+        player.velocityY = -player.jumpPower;
+        player.grounded = false;
+      }
+      
+      // Apply gravity
+      player.velocityY += 0.5;
+      
+      // Update position
+      player.x += player.velocityX;
+      player.y += player.velocityY;
+      
+      // Ground collision
+      if (player.y + player.height >= level.ground.y) {
+        player.y = level.ground.y - player.height;
+        player.velocityY = 0;
+        player.grounded = true;
+      } else {
+        player.grounded = false;
+      }
+      
+      // Platform collision
+      level.platforms.forEach(platform => {
+        if (checkCollision(player, platform)) {
+          if (player.velocityY > 0 && player.y + player.height - player.velocityY <= platform.y) {
+            player.y = platform.y - player.height;
+            player.velocityY = 0;
+            player.grounded = true;
+          }
+        }
+      });
+      
+      // Pipe collision (solid platform)
+      if (level.pipes) {
+        level.pipes.forEach(pipe => {
+          if (checkCollision(player, pipe)) {
+            // Top collision - stand on pipe
+            if (player.velocityY > 0 && player.y + player.height - player.velocityY <= pipe.y) {
+              player.y = pipe.y - player.height;
+              player.velocityY = 0;
+              player.grounded = true;
+              
+              // Enter pipe only when standing on top and pressing down
+              if (keys['ArrowDown']) {
+                enterLevel(pipe.level);
+              }
+            }
+            // Side collision
+            else if (player.x + player.width > pipe.x && player.x < pipe.x + pipe.width) {
+              if (player.x < pipe.x) {
+                player.x = pipe.x - player.width;
+              } else {
+                player.x = pipe.x + pipe.width;
+              }
+              player.velocityX = 0;
+            }
+          }
+        });
+      }
+      
+      // Return pipe collision (solid platform)
+      if (level.returnPipe) {
+        if (checkCollision(player, level.returnPipe)) {
+          // Top collision - stand on pipe
+          if (player.velocityY > 0 && player.y + player.height - player.velocityY <= level.returnPipe.y) {
+            player.y = level.returnPipe.y - player.height;
+            player.velocityY = 0;
+            player.grounded = true;
+            
+            // Enter pipe only when standing on top and pressing down
+            if (keys['ArrowDown']) {
+              if (currentLevel === 'level1') levelCompleted.level1 = true;
+              if (currentLevel === 'level2') levelCompleted.level2 = true;
+              if (currentLevel === 'level3') levelCompleted.level3 = true;
+              enterLevel('main');
+            }
+          }
+          // Side collision
+          else if (player.x + player.width > level.returnPipe.x && player.x < level.returnPipe.x + level.returnPipe.width) {
+            if (player.x < level.returnPipe.x) {
+              player.x = level.returnPipe.x - player.width;
+            } else {
+              player.x = level.returnPipe.x + level.returnPipe.width;
+            }
+            player.velocityX = 0;
+          }
+        }
+      }
+      
+      // Coin collection
+      level.coins.forEach(coin => {
+        if (!coin.collected && checkCollision(player, {x: coin.x - 12, y: coin.y - 12, width: 24, height: 24})) {
+          coin.collected = true;
+          score += 10;
+          updateUI();
+        }
+      });
+      
+      // Palace interaction
+      if (level.palace && checkCollision(player, level.palace) && keys['ArrowUp']) {
+        if (levelCompleted.level1 && levelCompleted.level2 && levelCompleted.level3) {
+          enterLevel('final');
+        }
+      }
+      
+      // Trophy collection
+      if (level.trophy && checkCollision(player, level.trophy)) {
+        showVictory();
+      }
+      
+      // Camera follow
+      camera.x = player.x - canvasWidth / 3;
+      if (camera.x < 0) camera.x = 0;
+      
+      // Boundary check
+      if (player.x < 0) player.x = 0;
+    }
+
+    function draw() {
+      const config = window.elementSdk ? window.elementSdk.config : defaultConfig;
+      const level = levels[currentLevel];
+      
+      // Clear canvas with level-specific gradient
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvasHeight);
+      gradient.addColorStop(0, level.skyGradient[0]);
+      gradient.addColorStop(1, level.skyGradient[1]);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+      
+      // Draw background patterns
+      for (let i = 0; i < 5; i++) {
+        drawIslamicPattern(200 + i * 300 - (camera.x * 0.3), 100 + Math.sin(i) * 50, 30);
+      }
+      
+      // Ground
+      ctx.fillStyle = config.ground_color || defaultConfig.ground_color;
+      ctx.fillRect(level.ground.x - camera.x, level.ground.y, level.ground.width, level.ground.height);
+      
+      // Ground decoration
+      ctx.strokeStyle = 'rgba(139, 69, 19, 0.5)';
+      ctx.lineWidth = 2;
+      for (let i = 0; i < level.ground.width; i += 40) {
+        ctx.beginPath();
+        ctx.moveTo(i - camera.x, level.ground.y + 10);
+        ctx.lineTo(i + 20 - camera.x, level.ground.y + 10);
+        ctx.stroke();
+      }
+      
+      // Platforms
+      ctx.fillStyle = config.platform_color || defaultConfig.platform_color;
+      level.platforms.forEach(platform => {
+        ctx.fillRect(platform.x - camera.x, platform.y, platform.width, platform.height);
+        ctx.strokeStyle = 'rgba(139, 69, 19, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(platform.x - camera.x, platform.y, platform.width, platform.height);
+      });
+      
+      // Pipes
+      if (level.pipes) {
+        level.pipes.forEach(pipe => drawPipe(pipe, camera.x));
+      }
+      
+      // Return pipe
+      if (level.returnPipe) {
+        drawPipe(level.returnPipe, camera.x);
+      }
+      
+      // Palace
+      if (level.palace) {
+        drawPalace(level.palace, camera.x);
+      }
+      
+      // Trophy
+      if (level.trophy) {
+        drawTrophy(level.trophy, camera.x);
+      }
+      
+      // Coins
+      level.coins.forEach(coin => drawCoin(coin, camera.x));
+      
+      // Player
+      drawPlayer(camera.x);
+    }
+
+    function gameLoop() {
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function enterLevel(levelName) {
+      currentLevel = levelName;
+      player.x = 100;
+      player.y = 0;
+      player.velocityX = 0;
+      player.velocityY = 0;
+      camera.x = 0;
+      updateUI();
+    }
+
+    function updateUI() {
+      const config = window.elementSdk ? window.elementSdk.config : defaultConfig;
+      document.getElementById('scoreDisplay').textContent = `Score: ${score}`;
+      document.getElementById('levelDisplay').textContent = `Level: ${levels[currentLevel].name}`;
+    }
+
+    function showVictory() {
+      const config = window.elementSdk ? window.elementSdk.config : defaultConfig;
+      document.getElementById('victoryMessage').textContent = config.victory_message || defaultConfig.victory_message;
+      document.getElementById('victoryScreen').classList.add('active');
+    }
+
+    document.getElementById('restartButton').addEventListener('click', () => {
+      score = 0;
+      levelCompleted = {level1: false, level2: false, level3: false};
+      
+      // Reset all coins
+      Object.keys(levels).forEach(key => {
+        levels[key].coins.forEach(coin => coin.collected = false);
+      });
+      
+      document.getElementById('victoryScreen').classList.remove('active');
+      enterLevel('main');
+    });
+
+    // Element SDK integration
+    async function onConfigChange(config) {
+      const customFont = config.font_family || defaultConfig.font_family;
+      const baseSize = config.font_size || defaultConfig.font_size;
+      
+      document.body.style.fontFamily = `${customFont}, Arial, sans-serif`;
+      document.getElementById('ui').style.fontSize = `${baseSize * 1.5}px`;
+      document.getElementById('instructions').style.fontSize = `${baseSize}px`;
+      document.getElementById('victoryTitle').style.fontSize = `${baseSize * 3}px`;
+      document.getElementById('victoryMessage').style.fontSize = `${baseSize * 1.5}px`;
+      document.getElementById('restartButton').style.fontSize = `${baseSize * 1.25}px`;
+      
+      updateUI();
+    }
+
+    function mapToCapabilities(config) {
+      return {
+        recolorables: [
+          {
+            get: () => config.background_color || defaultConfig.background_color,
+            set: (value) => {
+              config.background_color = value;
+              window.elementSdk.setConfig({ background_color: value });
+            }
+          },
+          {
+            get: () => config.ground_color || defaultConfig.ground_color,
+            set: (value) => {
+              config.ground_color = value;
+              window.elementSdk.setConfig({ ground_color: value });
+            }
+          },
+          {
+            get: () => config.platform_color || defaultConfig.platform_color,
+            set: (value) => {
+              config.platform_color = value;
+              window.elementSdk.setConfig({ platform_color: value });
+            }
+          },
+          {
+            get: () => config.character_color || defaultConfig.character_color,
+            set: (value) => {
+              config.character_color = value;
+              window.elementSdk.setConfig({ character_color: value });
+            }
+          },
+          {
+            get: () => config.coin_color || defaultConfig.coin_color,
+            set: (value) => {
+              config.coin_color = value;
+              window.elementSdk.setConfig({ coin_color: value });
+            }
+          }
+        ],
+        borderables: [],
+        fontEditable: {
+          get: () => config.font_family || defaultConfig.font_family,
+          set: (value) => {
+            config.font_family = value;
+            window.elementSdk.setConfig({ font_family: value });
+          }
+        },
+        fontSizeable: {
+          get: () => config.font_size || defaultConfig.font_size,
+          set: (value) => {
+            config.font_size = value;
+            window.elementSdk.setConfig({ font_size: value });
+          }
+        }
+      };
+    }
+
+    function mapToEditPanelValues(config) {
+      return new Map([
+        ["game_title", config.game_title || defaultConfig.game_title],
+        ["character_name", config.character_name || defaultConfig.character_name],
+        ["victory_message", config.victory_message || defaultConfig.victory_message]
+      ]);
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities,
+        mapToEditPanelValues
+      });
+    }
+
+    // Start game
+    gameLoop();
+    updateUI();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a1856f62191b00b',t:'MTc2MzY0NTgyMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
